@@ -58,7 +58,7 @@ class Agent():
         self.update_step = 0
 
     # def step(self, state, action, reward, next_state, done):
-    def step(self, states, actions, rewards, next_states, dones, num_data=1):
+    def step(self, states, actions, rewards, next_states, dones, num_samples=1):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
         for state, action, reward, next_state, done in zip(states, actions, rewards, next_states, dones):
@@ -69,7 +69,7 @@ class Agent():
         if self.update_step % TARGET_UPDATE == 0:
             # Learn, if enough samples are available in memory
             if len(self.memory) > BATCH_SIZE:
-                for i in range(num_data):
+                for i in range(num_samples):
                     experiences = self.memory.sample()
                     self.learn(experiences, GAMMA)
 

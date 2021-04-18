@@ -20,7 +20,7 @@ env = UnityEnvironment(file_name=unity_exe)
 # Train DDPG
 #
 
-def ddpg(env, agent, num_data=1, chk_prefix='1', episodes=500, print_every=10):
+def ddpg(env, agent, chk_prefix='1', episodes=500, print_every=10, num_samples=1):
     all_scores = []
     avg_scores_window = []
     scores_window = deque(maxlen=100)
@@ -39,7 +39,7 @@ def ddpg(env, agent, num_data=1, chk_prefix='1', episodes=500, print_every=10):
             rewards = env_info.rewards
             dones = env_info.local_done
 
-            agent.step(states, actions, rewards, next_states, dones, num_data=1)
+            agent.step(states, actions, rewards, next_states, dones, num_samples=num_samples)
             states = next_states
             scores += rewards
             if np.any(dones):
@@ -66,7 +66,7 @@ def ddpg(env, agent, num_data=1, chk_prefix='1', episodes=500, print_every=10):
 # Create agent
 agent = Agent(num_agents=20, state_size=33, action_size=4, random_seed=42, device='cpu')
 # Train
-all_scores = ddpg(env, agent, num_data=1, chk_prefix="1", episodes=100, print_every=10)
+all_scores = ddpg(env, agent, chk_prefix="1", episodes=200, print_every=10, num_samples=1)
 # Plot
 plt.figure()
 plt.xlabel('Episode')
