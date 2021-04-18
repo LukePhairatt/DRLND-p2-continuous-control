@@ -128,7 +128,9 @@ Environment solved in 176 episodes!	Average Score: 30.08
 ![train2](./agent20_final.png)
 
 
+### DDPG Implementation Details
 
+Further information regarding to the implementation can be found in [Report.md](./Report.md)   
 
 
 
