@@ -18,15 +18,11 @@ The observation space consists of 33 variables corresponding to position, rotati
 
 ### Distributed Training
 
-For this project, we will provide you with two separate versions of the Unity environment:
+For this project, we will provide you with two separate versions of the Unity environment:  
 - The first version contains a single agent.
 - The second version contains 20 identical agents, each with its own copy of the environment.  
 
-The second version is useful for algorithms like [PPO](https://arxiv.org/pdf/1707.06347.pdf), [A3C](https://arxiv.org/pdf/1602.01783.pdf), and [D4PG](https://openreview.net/pdf?id=SyZipzbCb) that use multiple (non-interacting, parallel) copies of the same agent to distribute the task of gathering experience.  
-
 ### Solving the Environment
-
-Note that your project submission need only solve one of the two versions of the environment. 
 
 #### Option 1: Solve the First Version
 
@@ -38,11 +34,13 @@ The barrier for solving the second version of the environment is slightly differ
 - After each episode, we add up the rewards that each agent received (without discounting), to get a score for each agent.  This yields 20 (potentially different) scores.  We then take the average of these 20 scores. 
 - This yields an **average score** for each episode (where the average is over all 20 agents).
 
-The environment is considered solved, when the average (over 100 episodes) of those average scores is at least +30. 
+The environment is considered solved, when the average (over 100 episodes) of those average scores is at least +30.   
+
 
 ### Getting Started
+1. Follow instruction here [click here](https://github.com/udacity/deep-reinforcement-learning#dependencies) to set up your Python environment with unityagents.  
 
-1. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
+2. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
 
     - **_Version 1: One (1) Agent_**
         - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Linux.zip)
@@ -60,29 +58,77 @@ The environment is considered solved, when the average (over 100 episodes) of th
 
     (_For AWS_) If you'd like to train the agent on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Linux_NoVis.zip) (version 1) or [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Linux_NoVis.zip) (version 2) to obtain the "headless" version of the environment.  You will **not** be able to watch the agent without enabling a virtual screen, but you will be able to train the agent.  (_To watch the agent, you should follow the instructions to [enable a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above._)
 
-2. Place the file in the DRLND GitHub repository, in the `p2_continuous-control/` folder, and unzip (or decompress) the file. 
+3. Clone this GitHub repository, and add the environment files in the data folder (data/Vis, data/NoVis) accordingly.
 
-### Instructions
+### Instructions  
 
-Follow the instructions in `Continuous_Control.ipynb` to get started with training your own agent!  
+Step 1. Pre-train network on **CPU** with **1 x BATCH_SIZE** update
+```
+$ python MultiAgents_Train1.py
+```
 
-### (Optional) Challenge: Crawler Environment
+Step 2. Load a pre-train network on **GPU** to continue with **2 x BATCH_SIZE** update
+```
+$ python MultiAgents_Train2.py
+```
+Note: **This project implements option 2 (20 agents).**  
 
-After you have successfully completed the project, you might like to solve the more difficult **Crawler** environment.
+### Results
 
-![Crawler][image2]
+Train 1:
+```
+Episode 10	Average Score: 0.32
+Episode 20	Average Score: 0.77
+Episode 30	Average Score: 1.52
+Episode 40	Average Score: 2.46
+Episode 50	Average Score: 3.55
+Episode 60	Average Score: 4.42
+Episode 70	Average Score: 5.43
+Episode 80	Average Score: 6.21
+Episode 90	Average Score: 6.73
+Episode 100	Average Score: 7.07
+Episode 110	Average Score: 8.21
+Episode 120	Average Score: 9.38
+Episode 130	Average Score: 10.47
+Episode 140	Average Score: 11.31
+Episode 150	Average Score: 11.88
+Episode 160	Average Score: 12.27
+Episode 170	Average Score: 12.23
+Episode 180	Average Score: 12.14
+Episode 190	Average Score: 12.20
+Episode 200	Average Score: 12.38
+```
+[train1](./agent20_train1.png)
 
-In this continuous control environment, the goal is to teach a creature with four legs to walk forward without falling.  
 
-You can read more about this environment in the ML-Agents GitHub [here](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#crawler).  To solve this harder task, you'll need to download a new Unity environment.  (**Note**: Udacity students should not submit a project with this new environment.)
 
-You need only select the environment that matches your operating system:
-- Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Linux.zip)
-- Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler.app.zip)
-- Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Windows_x86.zip)
-- Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Windows_x86_64.zip)
 
-Then, place the file in the `p2_continuous-control/` folder in the DRLND GitHub repository, and unzip (or decompress) the file.  Next, open `Crawler.ipynb` and follow the instructions to learn how to use the Python API to control the agent.
+Train 2 (continue from 1):
+```
+Episode 10	Average Score: 1.01
+Episode 20	Average Score: 3.35
+Episode 30	Average Score: 5.39
+Episode 40	Average Score: 7.13
+Episode 50	Average Score: 8.62
+Episode 60	Average Score: 10.21
+Episode 70	Average Score: 11.52
+Episode 80	Average Score: 12.66
+Episode 90	Average Score: 13.94
+Episode 100	Average Score: 15.15
+Episode 110	Average Score: 18.02
+Episode 120	Average Score: 20.64
+Episode 130	Average Score: 23.07
+Episode 140	Average Score: 25.12
+Episode 150	Average Score: 26.96
+Episode 160	Average Score: 28.31
+Episode 170	Average Score: 29.46
+Episode 176	Average Score: 30.08
+Environment solved in 176 episodes!	Average Score: 30.08
+```
+[train2](./agent20_final.png)
 
-(_For AWS_) If you'd like to train the agent on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Linux_NoVis.zip) to obtain the "headless" version of the environment.  You will **not** be able to watch the agent without enabling a virtual screen, but you will be able to train the agent.  (_To watch the agent, you should follow the instructions to [enable a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above._)
+
+
+
+
 
