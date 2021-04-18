@@ -63,7 +63,7 @@ def training_ddpg(env, agent, chk_prefix='1', episodes=500, print_every=10):
     return scores_all
 '''
 
-# Train 2- gpu: Create the agent
+# Train 2- gpu: number of BATCH update (num_sample_update) = 2
 # Create agent and load check point from the previous training
 ddpg_agent = Agent(state_size=33, action_size=4, random_seed=42, device='gpu')
 state_dict = torch.load('checkpoint_actor_1.pth')
