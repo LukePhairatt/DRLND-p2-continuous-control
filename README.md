@@ -98,7 +98,7 @@ Episode 180	Average Score: 12.14
 Episode 190	Average Score: 12.20
 Episode 200	Average Score: 12.38
 ```
-[train1](./agent20_train1.png)
+![train1](./agent20_train1.png)
 
 
 
@@ -125,7 +125,7 @@ Episode 170	Average Score: 29.46
 Episode 176	Average Score: 30.08
 Environment solved in 176 episodes!	Average Score: 30.08
 ```
-[train2](./agent20_final.png)
+![train2](./agent20_final.png)
 
 
 
