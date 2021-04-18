@@ -25,7 +25,7 @@ brain = unity_env.brains[brain_name]
 # Environment
 env_info = unity_env.reset(train_mode=False)[brain_name]    # reset the environment
 states = env_info.vector_observations                       # get the current state (for each agent)
-state_size = state.shape[1]                                 # get a number of agents
+state_size = states.shape[1]                                 # get a number of agents
 action_size = brain.vector_action_space_size
 num_agents = len(env_info.agents)
 scores = np.zeros(num_agents)                               # initialize the score (for each agent)
@@ -36,7 +36,7 @@ ddpg_agent.actor_local.load_state_dict(state_dict)
 # Play
 while True:
     actions = ddpg_agent.act(states, add_noise=False)
-    env_info = env.step(actions)[brain_name]           # send all actions to tne environment
+    env_info = unity_env.step(actions)[brain_name]           # send all actions to tne environment
     next_states = env_info.vector_observations         # get next state (for each agent)
     rewards = env_info.rewards                         # get reward (for each agent)
     dones = env_info.local_done                        # see if episode finished
