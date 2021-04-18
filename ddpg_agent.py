@@ -14,12 +14,12 @@ TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor
 LR_CRITIC = 1e-4        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
-TARGET_UPDATE = 1        # updating target networks every N steps
+TARGET_UPDATE = 1       # updating target networks every N steps
 
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, num_agents, state_size, action_size, random_seed, device):
+    def __init__(self, state_size, action_size, random_seed, device):
         """Initialize an Agent object.
 
         Params
@@ -28,12 +28,11 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
-        self.num_agents = num_agents
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
         # Device to run
-        if (device == 'cpu'):
+        if device == 'cpu':
             self.device = torch.device("cpu")
         else:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -57,8 +56,7 @@ class Agent():
         # Step counter for Agent
         self.update_step = 0
 
-    # def step(self, state, action, reward, next_state, done):
-    def step(self, states, actions, rewards, next_states, dones, num_samples=1):
+    def step(self, states, actions, rewards, next_states, dones, num_sample_update=1):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
         for state, action, reward, next_state, done in zip(states, actions, rewards, next_states, dones):
@@ -69,7 +67,7 @@ class Agent():
         if self.update_step % TARGET_UPDATE == 0:
             # Learn, if enough samples are available in memory
             if len(self.memory) > BATCH_SIZE:
-                for i in range(num_samples):
+                for i in range(num_sample_update):
                     experiences = self.memory.sample()
                     self.learn(experiences, GAMMA)
 
@@ -210,3 +208,46 @@ class ReplayBuffer:
     def __len__(self):
         """Return the current size of internal memory."""
         return len(self.memory)
+
+## Helper function to train the DDPG agent
+def training_ddpg(env, agent, chk_prefix='1', episodes=500, print_every=10, num_sample_update=1):
+    scores_all = []
+    scores_window = deque(maxlen=100)
+    actor_checkpoint = "checkpoint_actor_" + chk_prefix + ".pth"
+    critic_checkpoint = "checkpoint_critic_" + chk_prefix + ".pth"
+    brain_name = env.brain_names[0]
+    env_info = env.reset(train_mode=True)[brain_name]
+    num_agents = len(env_info.agents)
+    for i_episode in range(1, episodes + 1):
+        states = env_info.vector_observations
+        scores = np.zeros(num_agents)
+        while True:
+            # interacting
+            actions = agent.act(states)
+            env_info = env.step(actions)[brain_name]
+            next_states = env_info.vector_observations
+            rewards = env_info.rewards
+            dones = env_info.local_done
+            # learning
+            agent.step(states, actions, rewards, next_states, dones, num_sample_update)
+            states = next_states
+            scores += rewards
+            if np.any(dones):
+                break
+
+        mean_score = np.mean(scores)
+        scores_window.append(mean_score)
+        scores_all.append(mean_score)
+        print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)), end="")
+        if i_episode % print_every == 0:
+            print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)))
+            torch.save(agent.actor_local.state_dict(), actor_checkpoint)
+            torch.save(agent.critic_local.state_dict(), critic_checkpoint)
+        if np.mean(scores_window) >= 30:
+            print('\nEnvironment solved in {:d} episodes!\tAverage Score: {:.2f}'.format(i_episode,
+                                                                                         np.mean(scores_window)))
+            torch.save(agent.actor_local.state_dict(), actor_checkpoint)
+            torch.save(agent.critic_local.state_dict(), critic_checkpoint)
+            break
+    return scores_all
+
