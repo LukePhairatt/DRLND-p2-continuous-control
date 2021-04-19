@@ -1,88 +1,161 @@
-# Project 1: Navigation
+# Project 2: Reacher (Continuous Control)
 
 ### Introduction
-DQN and Double DQN have been used for learning by the agent (see dqn_agents.py). In this repository, there are 3 files used for training the agents as follows.  
+DDPG(Deep Deterministic Policy Gradients) has been used to solve this reacher environment in continous spaces. In this DDPG, there is an actor and a critic network each of which has a local and target, similar to DQN (Deep Q-Network) reinforcement learning. The actor network is learning to estimate the optimal actions which will be validated by the critic network during training to improve the actor (local)network.   
 
-**Navigation.ipynb** is the main routine to create the environment and the agen. It is where the agent interacts with the environment during learning and keeping track of scores for each episode.  
+Actor network: Input:states | Output:actions  
+Critic neowk: Input:states,action | Output: Q action value  
 
-**dqn_agent** is the DQN algorithm to update the Q network in both a local and a target network.  
+**Q Network**  
+The network is defined in `model.py`. In this reacher environment, we are using 3 fully connected layers with RELU, tanh activation.  
+By default, the actor and critic has a similar network. it has input and output of each layer as follows.  
+
+`Actor`
+```
+input layer:  Relu(linear[state_size, 128])  
+hidden layer: Relu(linear[128, 128])  
+output layer: tanh([128, action_size])   
+
+`Critic`
+```
+input layer:  Relu(linear[state_size, 128])  
+hidden layer: Relu(linear[concat(128, action_size), 128])  
+output layer: linear[128, 1]   
+
+
+**Algorithm**  
+DDPG learning is acheived by interacting, learning and updating the actor and critic network as follows:  
+
+Step 1. Interacting with the environment on the current actor policy
+
+Step 2. Add states, actions, rewards, next_states, dones to the ReplayBuffer
+
+Step 3. DDPG Actor/Critic learning `line 91 in ddpg_agen.py (learn function)`  
+
+* Update critic (local) network by minimising loss
+```
+Q_targets = r + gamma * critic_target(next_state, actor_target(next_state))
+Q_expected = critic_local(states, actions)
+
+```
+
+* Update actor (local) network by maximising the expect return of Q
+```
+actor_loss = -critic_local(states, actor_local(states)).mean()
+
+``` 
+
+* Soft update: critic/actor (target) network  
+```
+target = tau * local + (1.0 - tau) * target
+
+```
+
+### Learning  
+In this repository, there are 3 files used for training the agents as follows.  
+
+**MultiAgents_Train1.py, MultiAgents_Train2.py** is the main routine to create the environment, the agent and the training.   
+
+**ddpg_agent** is the DDPG algorithm to update the Q network in both a local and a target network. Replay buffer and OUNoise for actions.
 
 **model.py** is the Q network definition.   
 
 
-### Learning  
 **Hyperparametrs**  
 ```
-BUFFER_SIZE = int(1e5)  # replay buffer size   
-BATCH_SIZE = 64         # minibatch size  
+BUFFER_SIZE = int(1e5)  # replay buffer size  
+BATCH_SIZE = 128        # minibatch size  
 GAMMA = 0.99            # discount factor  
 TAU = 1e-3              # for soft update of target parameters  
-LR = 5e-4               # learning rate   
-UPDATE_EVERY = 4        # how often to update the network  
-
-max_t = 1000		# maximum number of timesteps per episode  
-eps_start = 1.0		# starting value of epsilon, for epsilon-greedy action selection  
-eps_end = 0.01          # minimum value of epsilon  
-eps_decay = 0.995       # multiplicative factor (per episode) for decreasing epsilon  
+LR_ACTOR = 1e-4         # learning rate of the actor  
+LR_CRITIC = 1e-4        # learning rate of the critic  
+WEIGHT_DECAY = 0        # L2 weight decay  
+TARGET_UPDATE = 1       # updating target networks every N steps  
+```
+**Training on 20-Agent environment**
+Step 1. Pre-train network on **CPU** with **1 x BATCH_SIZE** update
+```
+$ python MultiAgents_Train1.py
 ```
 
-**Algorithm**  
-DQN learning is acheived by computing loss with Q target and Q expected by this formula  
-
-`line 100-113 in dqn_agent.py`
+Step 2. Load a pre-train network on **GPU** to continue with **2 x BATCH_SIZE** update
 ```
-Q_target(st, at) = reward + gamma * max(Q_target(st+1))  
-Q_expected(st, at) = Q_local(st, at)
-
-where 
-	st = current state,  st+1 = next state
-	at = current action, at+1 = next action
-
-```
-Fixed Q_target update is done by a soft-update with a TAU factor `line 118-129 in dqn_agent.py`.  
-
-**Q Network**  
-The network is defined in `model.py`. It has 3 fully connected layers with RELU activation (input and hidden layer).  
-By default, it has input and output of each layer as follows.  
-
-```
-input layer:  [state_size, 128]  
-hidden layer: [128, 64]  
-output layer: [64, action_size]   
+$ python MultiAgents_Train2.py
 ```
 
 ### Plot of Rewards    
+**Agent Train 1 Scores** (1 x BATCH_SIZE update on CPU)  
+![train1_scores](/images/DQN_scores.png)  
 
-**DQN Scores**  
-![DQN_scores](/images/DQN_scores.png)  
+```
+Episode 10	Average Score: 0.32
+Episode 20	Average Score: 0.77
+Episode 30	Average Score: 1.52
+Episode 40	Average Score: 2.46
+Episode 50	Average Score: 3.55
+Episode 60	Average Score: 4.42
+Episode 70	Average Score: 5.43
+Episode 80	Average Score: 6.21
+Episode 90	Average Score: 6.73
+Episode 100	Average Score: 7.07
+Episode 110	Average Score: 8.21
+Episode 120	Average Score: 9.38
+Episode 130	Average Score: 10.47
+Episode 140	Average Score: 11.31
+Episode 150	Average Score: 11.88
+Episode 160	Average Score: 12.27
+Episode 170	Average Score: 12.23
+Episode 180	Average Score: 12.14
+Episode 190	Average Score: 12.20
+Episode 200	Average Score: 12.38
+```
+![train1](./agent20_train1.png)
 
+
+**Agent Train 2 Scores** (continue from Train 1 with 2 x BATCH_SIZE update on GPU)  
+![train2_scores](/images/double_DQN_scores.png)  
+Train 2 (continue from 1):
 ```
-Episode 100	Average Score: 0.08
-Episode 200	Average Score: 2.04
-Episode 300	Average Score: 5.38
-Episode 400	Average Score: 8.57
-Episode 500	Average Score: 12.80
-Episode 504	Average Score: 13.00
-Environment solved in 504 episodes!	Average Score: 13.00
+Episode 10	Average Score: 1.01
+Episode 20	Average Score: 3.35
+Episode 30	Average Score: 5.39
+Episode 40	Average Score: 7.13
+Episode 50	Average Score: 8.62
+Episode 60	Average Score: 10.21
+Episode 70	Average Score: 11.52
+Episode 80	Average Score: 12.66
+Episode 90	Average Score: 13.94
+Episode 100	Average Score: 15.15
+Episode 110	Average Score: 18.02
+Episode 120	Average Score: 20.64
+Episode 130	Average Score: 23.07
+Episode 140	Average Score: 25.12
+Episode 150	Average Score: 26.96
+Episode 160	Average Score: 28.31
+Episode 170	Average Score: 29.46
+Episode 176	Average Score: 30.08
+Environment solved in 176 episodes!	Average Score: 30.08
+```
+![train2](./agent20_final.png)
+
+### Evaluation
+```
+$ python Play_Env.py
+:
+:
+Accumulated Score: 35.79
+Accumulated Score: 35.83
+Accumulated Score: 35.87
+Accumulated Score: 35.91
+Accumulated Score: 35.94
+Accumulated Score: 35.98
+Accumulated Score: 36.02
+Accumulated Score: 36.06
 ```
 
-**Double DQN Scores**  
-![double_DQN_scores](/images/double_DQN_scores.png)  
-```
-Episode 100	Average Score: 0.96
-Episode 200	Average Score: 4.24
-Episode 300	Average Score: 7.54
-Episode 400	Average Score: 10.69
-Episode 482	Average Score: 13.05
-Environment solved in 482 episodes!	Average Score: 13.05
-```
 ### Future Improvements
-Double DQN might not out perform normal DQN is some environment. There are a few approaches such as **Dueling DQN**, and   
-**Prioritized Experience Replay** or **a combination of these approaches** have been shown with an improvement toward  
-a stability of learning. The brief ideas for the future improvement of these approaches are as follows.
-
-With the problem of uniformly sampling experiences from a reply memory regardless of their significance, some rare important experiences may not be picked as frequently as we hope. `Prioritized Experience Replay` addresses this issue by prioritizing the experience transition in the replay memory. The more important experience the agent can learn from more effectively (e.g. bigger TD error) the higher priority for sampling will be assigned.   
- 
-`Dueling DQN` focuses on the improvement of Q-values estimation. The core idea is to use 2 streams of branched-off DQN to estimate 1. state values- V(s) and 2. Advantage values (A(s, a)). The value function V(s) indicates a reward on a given state. And the advantage function A(s, a) indicates an advantage one action over the other actions on a given state. These 2 values are then combined to estimate the better Q-values.  
+In this project, the basic DDPG is used. For further improvement in order to learning faster and to achieve a better scores. We could implement
+1. Batch normalisation
+2. Cooperate epsilon greed policy 
 
 

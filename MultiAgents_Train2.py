@@ -20,48 +20,6 @@ unity_env = UnityEnvironment(file_name=unity_exe)
 #
 # Train DDPG
 #
-'''
-def training_ddpg(env, agent, chk_prefix='1', episodes=500, print_every=10):
-    scores_all = []
-    scores_window = deque(maxlen=100)
-    actor_checkpoint = "checkpoint_actor_" + chk_prefix + ".pth"
-    critic_checkpoint = "checkpoint_critic_" + chk_prefix + ".pth"
-    brain_name = env.brain_names[0]
-    env_info = env.reset(train_mode=True)[brain_name]
-    num_agents = len(env_info.agents)
-    for i_episode in range(1, episodes + 1):
-        states = env_info.vector_observations
-        scores = np.zeros(num_agents)
-        while True:
-            # interacting
-            actions = agent.act(states)
-            env_info = env.step(actions)[brain_name]
-            next_states = env_info.vector_observations
-            rewards = env_info.rewards
-            dones = env_info.local_done
-            # learning
-            agent.step(states, actions, rewards, next_states, dones)
-            states = next_states
-            scores += rewards
-            if np.any(dones):
-                break
-
-        mean_score = np.mean(scores)
-        scores_window.append(mean_score)
-        scores_all.append(mean_score)
-        print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)), end="")
-        if i_episode % print_every == 0:
-            print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)))
-            torch.save(agent.actor_local.state_dict(), actor_checkpoint)
-            torch.save(agent.critic_local.state_dict(), critic_checkpoint)
-        if np.mean(scores_window) >= 30:
-            print('\nEnvironment solved in {:d} episodes!\tAverage Score: {:.2f}'.format(i_episode,
-                                                                                         np.mean(scores_window)))
-            torch.save(agent.actor_local.state_dict(), actor_checkpoint)
-            torch.save(agent.critic_local.state_dict(), critic_checkpoint)
-            break
-    return scores_all
-'''
 
 # Train 2- gpu: number of BATCH update (num_sample_update) = 2
 # Create agent and load check point from the previous training

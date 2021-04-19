@@ -42,7 +42,8 @@ while True:
     dones = env_info.local_done                        # see if episode finished
     scores += env_info.rewards                         # update the score (for each agent)
     states = next_states                               # roll over states to next time step
+    print('\rAccumulated Score: {:.2f}'.format(np.mean(scores), end=""))
     if np.any(dones):                                  # exit loop if episode finished
         break
-print('Total score (averaged over agents) this episode: {}'.format(np.mean(scores)))
+#print('\nTotal score (averaged over agents) this episode: {}'.format(np.mean(scores)))
 unity_env.close()
