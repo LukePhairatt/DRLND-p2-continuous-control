@@ -154,8 +154,9 @@ Accumulated Score: 36.06
 ```
 
 ### Future Improvements
-In this project, the basic DDPG is used. For further improvement in order to learning faster and to achieve a better scores. We could implement
-1. Batch normalisation
-2. Cooperate epsilon greed policy 
+In this project, the basic DDPG is used. For further improvement in order to learning faster and to achieve a better scores. We could implement  
+1. Batch normalisation to reduce a major variation in states that may cause a big weight update.  
+2. Cooperate epsilon greed policy to improve exploration and exploitation dilemma in addition to adding noise to the actions alone.
+3. Prioritized Experience Replay to improve the efficiency of experience replay in DDPG method by replacing the original uniform experience replay with prioritized experience replay.
 
 
