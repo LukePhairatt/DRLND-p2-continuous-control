@@ -22,6 +22,7 @@ output layer: tanh([128, action_size])
 input layer:  Relu(linear[state_size, 128])  
 hidden layer: Relu(linear[concat(128, action_size), 128])  
 output layer: linear[128, 1]   
+```
 
 
 **Algorithm**  
