@@ -7,16 +7,17 @@ Actor network: Input:states | Output:actions
 Critic neowk: Input:states,action | Output: Q action value  
 
 **Q Network**  
-The network is defined in `model.py`. In this reacher environment, we are using 3 fully connected layers with RELU, tanh activation.  
-By default, the actor and critic has a similar network. it has input and output of each layer as follows.  
+The networks are defined in `model.py`. In this reacher environment, we are using 3 fully connected layers with RELU, tanh activation.  
+By default, the actor and critic has a similar network where it has input and output of each layer as follows.  
 
-`Actor`
+(Actor network)
 ```
 input layer:  Relu(linear[state_size, 128])  
 hidden layer: Relu(linear[128, 128])  
 output layer: tanh([128, action_size])   
+```
 
-`Critic`
+(Critic network)
 ```
 input layer:  Relu(linear[state_size, 128])  
 hidden layer: Relu(linear[concat(128, action_size), 128])  
@@ -24,41 +25,38 @@ output layer: linear[128, 1]
 
 
 **Algorithm**  
-DDPG learning is acheived by interacting, learning and updating the actor and critic network as follows:  
+DDPG learning is acheived by interacting with the environment, learning and updating the actor and critic network as follows:  
 
-Step 1. Interacting with the environment on the current actor policy
+*Step 1*. Interacting with the environment on the current actor policy to collect 'states, actions, rewards, next_states, dones'  
 
-Step 2. Add states, actions, rewards, next_states, dones to the ReplayBuffer
+*Step 2*. Add theses states, actions, rewards, next_states, dones to the ReplayBuffer for a uniform random resampling  
 
-Step 3. DDPG Actor/Critic learning `line 91 in ddpg_agen.py (learn function)`  
+*Step 3*. DDPG Actor/Critic learning `line 91 in ddpg_agen.py (learn function)`  
 
 * Update critic (local) network by minimising loss
 ```
 Q_targets = r + gamma * critic_target(next_state, actor_target(next_state))
 Q_expected = critic_local(states, actions)
-
 ```
 
 * Update actor (local) network by maximising the expect return of Q
 ```
 actor_loss = -critic_local(states, actor_local(states)).mean()
-
 ``` 
 
 * Soft update: critic/actor (target) network  
 ```
 target = tau * local + (1.0 - tau) * target
-
 ```
 
 ### Learning  
 In this repository, there are 3 files used for training the agents as follows.  
 
-**MultiAgents_Train1.py, MultiAgents_Train2.py** is the main routine to create the environment, the agent and the training.   
+*MultiAgents_Train1.py, MultiAgents_Train2.py* is the main routine to create the environment, the agent and the training.   
 
-**ddpg_agent** is the DDPG algorithm to update the Q network in both a local and a target network. Replay buffer and OUNoise for actions.
+*ddpg_agent* is the DDPG algorithm to update the Q network in both a local and a target network. Replay buffer and OUNoise.  
 
-**model.py** is the Q network definition.   
+*model.py* is the Q network definition.   
 
 
 **Hyperparametrs**  
@@ -72,20 +70,19 @@ LR_CRITIC = 1e-4        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay  
 TARGET_UPDATE = 1       # updating target networks every N steps  
 ```
-**Training on 20-Agent environment**
-Step 1. Pre-train network on **CPU** with **1 x BATCH_SIZE** update
+**Training on 20-Agent environment**  
+Step 1. Pre-train network on **CPU** with **1 x BATCH_SIZE** update  
 ```
 $ python MultiAgents_Train1.py
 ```
 
-Step 2. Load a pre-train network on **GPU** to continue with **2 x BATCH_SIZE** update
+Step 2. Load a pre-train network on **GPU** to continue with **2 x BATCH_SIZE** update  
 ```
 $ python MultiAgents_Train2.py
 ```
 
 ### Plot of Rewards    
-**Agent Train 1 Scores** (1 x BATCH_SIZE update on CPU)  
-![train1_scores](/images/DQN_scores.png)  
+**Agent Train 1 Scores** (1 x BATCH_SIZE update on CPU, num_sample_update in line 70 ddpg_agent.py)  
 
 ```
 Episode 10	Average Score: 0.32
@@ -112,8 +109,8 @@ Episode 200	Average Score: 12.38
 ![train1](./agent20_train1.png)
 
 
-**Agent Train 2 Scores** (continue from Train 1 with 2 x BATCH_SIZE update on GPU)  
-![train2_scores](/images/double_DQN_scores.png)  
+**Agent Train 2 Scores** (continue from Train 1 with 2 x BATCH_SIZE update on GPU, num_sample_update in line 70 ddpg_agent.py)  
+
 Train 2 (continue from 1):
 ```
 Episode 10	Average Score: 1.01
@@ -154,9 +151,9 @@ Accumulated Score: 36.06
 ```
 
 ### Future Improvements
-In this project, the basic DDPG is used. For further improvement in order to learning faster and to achieve a better scores. We could implement  
-1. Batch normalisation to reduce a major variation in states that may cause a big weight update.  
-2. Cooperate epsilon greed policy to improve exploration and exploitation dilemma in addition to adding noise to the actions alone.
-3. Prioritized Experience Replay to improve the efficiency of experience replay in DDPG method by replacing the original uniform experience replay with prioritized experience replay.
+In this project, the basic DDPG is used. For further improvement in order to learn faster and to achieve a better scores with smoother update. We could implement  
+1. Batch normalisation to reduce a major variation in states that may cause a big weight update and hence a jump in return scores/rewards  
+2. Cooperate epsilon greed policy with decay to improve exploration and exploitation in addition to adding noise to the actions.  
+3. Prioritized Experience Replay to improve the efficiency of experience replay in DDPG method by replacing the original uniform experience replay with prioritized experience replay.  
 
 
